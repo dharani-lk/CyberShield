@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+
+{% block title %}Phishing Detector - {{ app_name }}{% endblock %}
+
+{% block page_title %}Phishing Detector{% endblock %}
+
+{% block content %}
+<div class="tool-header">
+    <div class="tool-info">
+        <h2><i class="fas fa-fish"></i> Phishing Detection Suite</h2>
+        <p>Analyze URLs and email content for social engineering attacks</p>
+    </div>
+</div>
+
+<div class="phishing-layout">
+    <!-- URL Analysis Section -->
+    <div class="analysis-section">
+        <div class="section-card">
+            <div class="card-header">
+                <h3><i class="fas fa-link"></i> URL Analysis</h3>
+                <span class="card-badge">Real-time Scan</span>
+            </div>
+            
+            <div class="analysis-form">
+                <div class="input-group">
+                    <span class="input-icon"><i class="fas fa-globe"></i></span>
+                    <input type="text" id="urlInput" class="form-control" 
+                           placeholder="Enter URL to analyze (e.g., [example.com](https://example.com/login)">
+                    <button class="btn btn-primary" id="analyzeUrlBtn">
+                        <i class="fas fa-search"></i> Analyze
+                    </button>
+                </div>
+            </div>
+            
+            <!-- URL Results -->
+            <div class="analysis-results" id="urlResults" style="display: none;">
+                <div class="risk-display">
+                    <div class="risk-meter">
+                        <svg viewBox="0 0 100 50">
+                            <path class="meter-bg" d="M 10 50 A 40 40 0 0 1 90 50"/>
+                            <path class="meter-fill" id="urlMeterFill" d="M 10 50 A 40 40 0 0 1 90 50"/>
+                        </svg>
+                        <div class="risk-score" id="urlRiskScore">0</div>
+                        <div class="risk-label" id="urlRiskLabel">Safe</div>
+                    </div>
+                </div>
+                
+                <div class="threat-indicators" id="urlIndicators">
+                    <!-- Populated by JS -->
+                </div>
+                
+                <div class="recommendations-box" id="urlRecommendations">
+                    <h4><i class="fas fa-lightbulb"></i> Recommendations</h4>
+                    <ul id="urlRecommendationsList"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Email Analysis Section -->
+    <div class="analysis-section">
+        <div class="section-card">
+            <div class="card-header">
+                <h3><i class="fas fa-envelope"></i> Email Analysis</h3>
+                <span class="card-badge">Content Scanner</span>
+            </div>
+            
+            <div class="analysis-form">
+                <textarea id="emailInput" class="form-control" rows="6" 
+                          placeholder="Paste suspicious email content here for analysis..."></textarea>
+                <button class="btn btn-primary btn-block" id="analyzeEmailBtn">
+                    <i class="fas fa-search"></i> Analyze Email Content
+                </button>
+            </div>
+            
+            <!-- Email Results -->
+            <div class="analysis-results" id="emailResults" style="display: none;">
+                <div class="risk-display">
+                    <div class="risk-circle" id="emailRiskCircle">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="circle-bg" cx="50" cy="50" r="45"/>
+                            <circle class="circle-fill" id="emailCircleFill" cx="50" cy="50" r="45"/>
+                        </svg>
+                        <div class="circle-content">
+                            <span class="score" id="emailRiskScore">0</span>
+                            <span class="label">Risk Score</span>
+                        </div>
+                    </div>
+                    <div class="risk-level" id="emailRiskLevel">
+                        <span class="level-badge safe">Safe</span>
+                    </div>
+                </div>
+                
+                <div class="detected-patterns" id="emailPatterns">
+                    <h4><i class="fas fa-flag"></i> Detected Patterns</h4>
+                    <div class="patterns-list" id="emailPatternsList"></div>
+                </div>
+                
+                <div class="recommendations-box" id="emailRecommendations">
+                    <h4><i class="fas fa-shield-alt"></i> Safety Recommendations</h4>
+                    <ul id="emailRecommendationsList"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Educational Section -->
+<div class="education-section">
+    <h3><i class="fas fa-graduation-cap"></i> Understanding Phishing Attacks</h3>
+    <div class="education-grid">
+        <div class="edu-card">
+            <div class="edu-icon"><i class="fas fa-link"></i></div>
+            <h4>Suspicious URLs</h4>
+            <p>Phishing URLs often mimic legitimate sites with slight spelling variations, excessive subdomains, or suspicious domains.</p>
+        </div>
+        <div class="edu-card">
+            <div class="edu-icon"><i class="fas fa-exclamation"></i></div>
+            <h4>Urgency Tactics</h4>
+            <p>Phishers create artificial urgency ("Your account will be closed!") to bypass rational decision-making.</p>
+        </div>
+        <div class="edu-card">
+            <div class="edu-icon"><i class="fas fa-user-secret"></i></div>
+            <h4>Brand Impersonation</h4>
+            <p>Attackers impersonate trusted brands like PayPal, Amazon, or your bank to gain credibility.</p>
+        </div>
+        <div class="edu-card">
+            <div class="edu-icon"><i class="fas fa-key"></i></div>
+            <h4>Credential Harvesting</h4>
+            <p>The ultimate goal is usually to steal login credentials, financial information, or personal data.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// URL Analysis
+const urlInput = document.getElementById('urlInput');
+const analyzeUrlBtn = document.getElementById('analyzeUrlBtn');
+
+analyzeUrlBtn.addEventListener('click', analyzeUrl);
+urlInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') analyzeUrl();
+});
+
+async function analyzeUrl() {
+    const url = urlInput.value.trim();
+    if (!url) {
+        showToast('Please enter a URL to analyze', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/api/phishing/analyze-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayUrlResults(result.data);
+        } else {
+            showToast(result.error || 'Analysis failed', 'error');
+        }
+    } catch (error) {
+        showToast('Network error. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function displayUrlResults(data) {
+    const resultsDiv = document.getElementById('urlResults');
+    resultsDiv.style.display = 'block';
+    
+    // Update risk score with animation
+    const scoreEl = document.getElementById('urlRiskScore');
+    const labelEl = document.getElementById('urlRiskLabel');
+    const meterFill = document.getElementById('urlMeterFill');
+    
+    // Animate score
+    animateValue(scoreEl, 0, data.risk_score, 800);
+    
+    // Set threat level colors
+    const colors = {
+        'safe': '#10b981',
+        'low': '#10b981',
+        'medium': '#f59e0b',
+        'high': '#ef4444',
+        'critical': '#dc2626'
+    };
+    
+    const color = colors[data.threat_level] || colors.safe;
+    meterFill.style.stroke = color;
+    
+    // Calculate meter angle (0-180 degrees)
+    const angle = (data.risk_score / 100) * 180;
+    const rad = (angle - 180) * Math.PI / 180;
+    const x = 50 + 40 * Math.cos(rad);
+    const y = 50 + 40 * Math.sin(rad);
+    const largeArc = angle > 90 ? 1 : 0;
+    meterFill.setAttribute('d', `M 10 50 A 40 40 0 ${largeArc} 1 ${x} ${y}`);
+    
+    labelEl.textContent = data.threat_level.charAt(0).toUpperCase() + data.threat_level.slice(1);
+    labelEl.style.color = color;
+    
+    // Display indicators
+    const indicatorsDiv = document.getElementById('urlIndicators');
+    indicatorsDiv.innerHTML = '';
+    
+    if (data.indicators && data.indicators.length > 0) {
+        data.indicators.forEach(indicator => {
+            const card = document.createElement('div');
+            card.className = `indicator-card ${indicator.severity}`;
+            card.innerHTML = `
+                <i class="fas fa-${getSeverityIcon(indicator.severity)}"></i>
+                <div class="indicator-content">
+                    <span class="indicator-type">${formatType(indicator.type)}</span>
+                    <span class="indicator-desc">${indicator.description}</span>
+                </div>
+            `;
+            indicatorsDiv.appendChild(card);
+        });
+    } else {
+        indicatorsDiv.innerHTML = '<p class="no-threats"><i class="fas fa-check-circle"></i> No suspicious indicators detected</p>';
+    }
+    
+    // Display recommendations
+    const recList = document.getElementById('urlRecommendationsList');
+    recList.innerHTML = '';
+    if (data.recommendations) {
+        data.recommendations.forEach(rec => {
+            const li = document.createElement('li');
+            li.textContent = rec;
+            recList.appendChild(li);
+        });
+    }
+}
+
+// Email Analysis
+const emailInput = document.getElementById('emailInput');
+const analyzeEmailBtn = document.getElementById('analyzeEmailBtn');
+
+analyzeEmailBtn.addEventListener('click', analyzeEmail);
+
+async function analyzeEmail() {
+    const content = emailInput.value.trim();
+    if (!content) {
+        showToast('Please paste email content to analyze', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/api/phishing/analyze-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayEmailResults(result.data);
+        } else {
+            showToast(result.error || 'Analysis failed', 'error');
+        }
+    } catch (error) {
+        showToast('Network error. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function displayEmailResults(data) {
+    const resultsDiv = document.getElementById('emailResults');
+    resultsDiv.style.display = 'block';
+    
+    // Update risk score
+    const scoreEl = document.getElementById('emailRiskScore');
+    animateValue(scoreEl, 0, data.risk_score, 800);
+    
+    // Update circle progress
+    const circleFill = document.getElementById('emailCircleFill');
+    const circumference = 2 * Math.PI * 45;
+    const offset = circumference - (data.risk_score / 100) * circumference;
+    circleFill.style.strokeDasharray = circumference;
+    circleFill.style.strokeDashoffset = offset;
+    
+    // Set color based on threat level
+    const colors = {
+        'safe': '#10b981',
+        'low': '#10b981',
+        'medium': '#f59e0b',
+        'high': '#ef4444',
+        'critical': '#dc2626'
+    };
+    circleFill.style.stroke = colors[data.threat_level] || colors.safe;
+    
+    // Update level badge
+    const levelDiv = document.getElementById('emailRiskLevel');
+    levelDiv.innerHTML = `<span class="level-badge ${data.threat_level}">${data.threat_level.toUpperCase()}</span>`;
+    
+    // Display detected patterns
+    const patternsDiv = document.getElementById('emailPatternsList');
+    patternsDiv.innerHTML = '';
+    
+    if (data.detected_patterns && data.detected_patterns.length > 0) {
+        data.detected_patterns.forEach(pattern => {
+            const patternEl = document.createElement('div');
+            patternEl.className = 'pattern-item';
+            patternEl.innerHTML = `
+                <div class="pattern-header">
+                    <span class="pattern-category">${pattern.category}</span>
+                    <span class="pattern-count">${pattern.count} match${pattern.count > 1 ? 'es' : ''}</span>
+                </div>
+                <div class="pattern-matches">
+                    ${pattern.matches.map(m => `<span class="match-tag">${m}</span>`).join('')}
+                </div>
+            `;
+            patternsDiv.appendChild(patternEl);
+        });
+    } else {
+        patternsDiv.innerHTML = '<p class="no-threats"><i class="fas fa-check-circle"></i> No phishing patterns detected</p>';
+    }
+    
+    // Display recommendations
+    const recList = document.getElementById('emailRecommendationsList');
+    recList.innerHTML = '';
+    if (data.recommendations) {
+        data.recommendations.forEach(rec => {
+            const li = document.createElement('li');
+            li.textContent = rec;
+            recList.appendChild(li);
+        });
+    }
+}
+
+// Helper functions
+function animateValue(element, start, end, duration) {
+    const startTime = performance.now();
+    
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const value = Math.floor(progress * (end - start) + start);
+        element.textContent = value;
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+    
+    requestAnimationFrame(update);
+}
+
+function getSeverityIcon(severity) {
+    const icons = {
+        'low': 'info-circle',
+        'medium': 'exclamation-circle',
+        'high': 'exclamation-triangle',
+        'critical': 'skull-crossbones'
+    };
+    return icons[severity] || 'info-circle';
+}
+
+function formatType(type) {
+    return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+</script>
+{% endblock %}

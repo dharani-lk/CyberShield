@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+
+{% block title %}File Integrity Checker - {{ app_name }}{% endblock %}
+
+{% block page_title %}File Integrity Checker{% endblock %}
+
+{% block content %}
+<div class="tool-header">
+    <div class="tool-info">
+        <h2><i class="fas fa-file-shield"></i> File Integrity Verification</h2>
+        <p>Generate and verify file hashes using SHA-256 cryptographic algorithm</p>
+    </div>
+</div>
+
+<div class="tool-layout">
+    <!-- Main Panel -->
+    <div class="tool-panel main-panel">
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="hash">
+                <i class="fas fa-hashtag"></i>
+                Generate Hash
+            </button>
+            <button class="tab-btn" data-tab="verify">
+                <i class="fas fa-check-double"></i>
+                Verify Integrity
+            </button>
+        </div>
+        
+        <!-- Generate Hash Tab -->
+        <div class="tab-content active" id="hashTab">
+            <div class="upload-zone" id="hashUploadZone">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h3>Drop file here or click to upload</h3>
+                <p>Supported formats: Documents, Images, Archives, Code files</p>
+                <p class="upload-limit">Maximum file size: 16 MB</p>
+                <input type="file" id="hashFileInput" class="file-input" hidden>
+            </div>
+            
+            <!-- Hash Results -->
+            <div class="result-panel" id="hashResults" style="display: none;">
+                <div class="result-header">
+                    <h3><i class="fas fa-fingerprint"></i> Hash Generated</h3>
+                    <span class="status-badge success">
+                        <i class="fas fa-check-circle"></i> Complete
+                    </span>
+                </div>
+                
+                <div class="result-grid">
+                    <div class="result-item">
+                        <label>File Name</label>
+                        <span id="resultFilename">-</span>
+                    </div>
+                    <div class="result-item">
+                        <label>File Size</label>
+                        <span id="resultFilesize">-</span>
+                    </div>
+                    <div class="result-item">
+                        <label>Algorithm</label>
+                        <span id="resultAlgorithm">SHA-256</span>
+                    </div>
+                    <div class="result-item">
+                        <label>Generated At</label>
+                        <span id="resultTimestamp">-</span>
+                    </div>
+                </div>
+                
+                <div class="hash-display">
+                    <label>SHA-256 Hash Value</label>
+                    <div class="hash-value-container">
+                        <code id="resultHash">-</code>
+                        <button class="btn-icon" onclick="copyHash()" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="result-actions">
+                    <button class="btn btn-primary" onclick="saveHash()">
+                        <i class="fas fa-save"></i> Save Hash Record
+                    </button>
+                    <button class="btn btn-secondary" onclick="generateReport()">
+                        <i class="fas fa-file-alt"></i> Download Report
+                    </button>
+                    <button class="btn btn-outline" onclick="resetHashForm()">
+                        <i class="fas fa-redo"></i> New File
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Verify Integrity Tab -->
+        <div class="tab-content" id="verifyTab">
+            <div class="verify-form">
+                <div class="form-group">
+                    <label for="originalHash">Original Hash Value</label>
+                    <input type="text" id="originalHash" class="form-control" 
+                           placeholder="Paste the original SHA-256 hash here">
+                </div>
+                
+                <div class="upload-zone small" id="verifyUploadZone">
+                    <div class="upload-icon small">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <h4>Upload file to verify</h4>
+                    <p>Compare file against original hash</p>
+                    <input type="file" id="verifyFileInput" class="file-input" hidden>
+                </div>
+                
+                <button class="btn btn-primary btn-block" id="verifyBtn" disabled>
+                    <i class="fas fa-check-double"></i> Verify Integrity
+                </button>
+            </div>
+            
+            <!-- Verification Results -->
+            <div class="verification-result" id="verificationResult" style="display: none;">
+                <div class="verification-status" id="verificationStatus">
+                    <div class="status-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="status-text">
+                        <h3 id="verifyStatusTitle">Integrity Verified</h3>
+                        <p id="verifyStatusMessage">File has not been modified</p>
+                    </div>
+                </div>
+                
+                <div class="hash-comparison">
+                    <div class="comparison-row">
+                        <label>Original Hash</label>
+                        <code id="verifyOriginalHash">-</code>
+                    </div>
+                    <div class="comparison-row">
+                        <label>Current Hash</label>
+                        <code id="verifyCurrentHash">-</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <aside class="tool-sidebar">
+        <!-- Saved Hashes -->
+        <div class="sidebar-card">
+            <h4><i class="fas fa-history"></i> Saved Hash Records</h4>
+            <div class="saved-hashes-list" id="savedHashesList">
+                {% if saved_hashes %}
+                    {% for hash in saved_hashes[:5] %}
+                    <div class="hash-record" data-hash="{{ hash.hash_value }}">
+                        <div class="record-info">
+                            <span class="record-filename">{{ hash.filename }}</span>
+                            <span class="record-date">{{ hash.created_at[:10] }}</span>
+                        </div>
+                        <button class="btn-icon small" onclick="useHash('{{ hash.hash_value }}')" title="Use for verification">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="empty-message">No saved hashes yet</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Info Card -->
+        <div class="sidebar-card info-card">
+            <h4><i class="fas fa-info-circle"></i> About File Hashing</h4>
+            <div class="info-content">
+                <p><strong>SHA-256</strong> (Secure Hash Algorithm 256-bit) creates a unique digital fingerprint of any file.</p>
+                
+                <div class="info-fact">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Any modification to a file, even a single bit change, produces a completely different hash.</span>
+                </div>
+                
+                <h5>Use Cases:</h5>
+                <ul>
+                    <li>Verify downloaded software</li>
+                    <li>Detect file tampering</li>
+                    <li>Digital forensics</li>
+                    <li>Backup verification</li>
+                </ul>
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Store current hash data
+let currentHashData = null;
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+        
+        // Update buttons
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Update content
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(tabId + 'Tab').classList.add('active');
+    });
+});
+
+// Hash file upload handling
+const hashUploadZone = document.getElementById('hashUploadZone');
+const hashFileInput = document.getElementById('hashFileInput');
+
+hashUploadZone.addEventListener('click', () => hashFileInput.click());
+
+hashUploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    hashUploadZone.classList.add('dragover');
+});
+
+hashUploadZone.addEventListener('dragleave', () => {
+    hashUploadZone.classList.remove('dragover');
+});
+
+hashUploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    hashUploadZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+        handleHashUpload(e.dataTransfer.files[0]);
+    }
+});
+
+hashFileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) {
+        handleHashUpload(e.target.files[0]);
+    }
+});
+
+async function handleHashUpload(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/api/file/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            currentHashData = result.data;
+            displayHashResults(result.data);
+            showToast('Hash generated successfully!', 'success');
+        } else {
+            showToast(result.error || 'Failed to generate hash', 'error');
+        }
+    } catch (error) {
+        showToast('Network error. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function displayHashResults(data) {
+    document.getElementById('resultFilename').textContent = data.filename;
+    document.getElementById('resultFilesize').textContent = data.file_size_formatted;
+    document.getElementById('resultAlgorithm').textContent = data.algorithm;
+    document.getElementById('resultTimestamp').textContent = new Date(data.created_at).toLocaleString();
+    document.getElementById('resultHash').textContent = data.hash_value;
+    
+    document.getElementById('hashResults').style.display = 'block';
+    hashUploadZone.style.display = 'none';
+}
+
+function copyHash() {
+    const hash = document.getElementById('resultHash').textContent;
+    navigator.clipboard.writeText(hash).then(() => {
+        showToast('Hash copied to clipboard!', 'success');
+    });
+}
+
+async function saveHash() {
+    if (!currentHashData) return;
+    
+    try {
+        const response = await fetch('/api/file/save-hash', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentHashData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast('Hash saved successfully!', 'success');
+            // Refresh saved hashes list
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast(result.error || 'Failed to save hash', 'error');
+        }
+    } catch (error) {
+        showToast('Network error. Please try again.', 'error');
+    }
+}
+
+async function generateReport() {
+    if (!currentHashData) return;
+    
+    try {
+        const response = await fetch('/api/file/report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentHashData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Extract filename from path
+            const filename = result.report_path.split('/').pop();
+            window.location.href = '/api/file/download-report/' + filename;
+            showToast('Report downloaded!', 'success');
+        } else {
+            showToast(result.error || 'Failed to generate report', 'error');
+        }
+    } catch (error) {
+        showToast('Network error. Please try again.', 'error');
+    }
+}
+
+function resetHashForm() {
+    currentHashData = null;
+    document.getElementById('hashResults').style.display = 'none';
+    hashUploadZone.style.display = 'flex';
+    hashFileInput.value = '';
+}
+
+// Verify tab functionality
+const verifyUploadZone = document.getElementById('verifyUploadZone');
+const verifyFileInput = document.getElementById('verifyFileInput');
+const originalHashInput = document.getElementById('originalHash');
+const verifyBtn = document.getElementById('verifyBtn');
+
+let verifyFile = null;
+
+verifyUploadZone.addEventListener('click', () => verifyFileInput.click());
+
+verifyUploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    verifyUploadZone.classList.add('dragover');
+});
+
+verifyUploadZone.addEventListener('dragleave', () => {
+    verifyUploadZone.classList.remove('dragover');
+});
+
+verifyUploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    verifyUploadZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+        verifyFile = e.dataTransfer.files[0];
+        verifyUploadZone.querySelector('h4').textContent = verifyFile.name;
+        checkVerifyReady();
+    }
+});
+
+verifyFileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) {
+        verifyFile = e.target.files[0];
+        verifyUploadZone.querySelector('h4').textContent = verifyFile.name;
+        checkVerifyReady();
+    }
+});
+
+originalHashInput.addEventListener('input', checkVerifyReady);
+
+function checkVerifyReady() {
+    verifyBtn.disabled = !(verifyFile && originalHashInput.value.trim());
+}
+
+verifyBtn.addEventListener('click', async () => {
+    if (!verifyFile || !originalHashInput.value.trim()) return;
+    
+    const formData = new FormData();
+    formData.append('file', verifyFile);
+    formData.append('original_hash', originalHashInput.value.trim());
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/api/file/verify', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayVerificationResult(result.data);
+        } else {
+            showToast(result.error || 'Verification failed', 'error');
+        }
+    } catch (error) {
+        showToast('Network error. Please try again.', 'error');
+    } finally {
+        hideLoading();
+    }
+});
+
+function displayVerificationResult(data) {
+    const resultDiv = document.getElementById('verificationResult');
+    const statusDiv = document.getElementById('verificationStatus');
+    const statusIcon = statusDiv.querySelector('.status-icon i');
+    const statusTitle = document.getElementById('verifyStatusTitle');
+    const statusMessage = document.getElementById('verifyStatusMessage');
+    
+    if (data.is_intact) {
+        statusDiv.className = 'verification-status success';
+        statusIcon.className = 'fas fa-check-circle';
+        statusTitle.textContent = 'Integrity Verified';
+        statusMessage.textContent = 'File has not been modified. Hash values match.';
+    } else {
+        statusDiv.className = 'verification-status danger';
+        statusIcon.className = 'fas fa-exclamation-triangle';
+        statusTitle.textContent = 'Integrity Compromised';
+        statusMessage.textContent = 'WARNING: File has been modified! Hash mismatch detected.';
+    }
+    
+    document.getElementById('verifyOriginalHash').textContent = data.original_hash;
+    document.getElementById('verifyCurrentHash').textContent = data.current_hash;
+    
+    resultDiv.style.display = 'block';
+}
+
+function useHash(hash) {
+    // Switch to verify tab
+    document.querySelector('[data-tab="verify"]').click();
+    // Fill in hash
+    originalHashInput.value = hash;
+    checkVerifyReady();
+}
+</script>
+{% endblock %}

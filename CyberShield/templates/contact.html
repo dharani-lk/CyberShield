@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact - {{ app_name }}{% endblock %}
+
+{% block page_title %}Contact Us{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+    <div class="contact-container">
+        <!-- Contact Form -->
+        <div class="contact-form-section">
+            <h2>Get in Touch</h2>
+            <p>Have questions about cybersecurity or this project? Send us a message.</p>
+            
+            <form id="contactForm" class="contact-form">
+                <div class="form-group">
+                    <label for="name">
+                        <i class="fas fa-user"></i> Name
+                    </label>
+                    <input type="text" id="name" name="name" class="form-control" 
+                           placeholder="Your full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" id="email" name="email" class="form-control" 
+                           placeholder="your@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">
+                        <i class="fas fa-comment"></i> Message
+                    </label>
+                    <textarea id="message" name="message" class="form-control" 
+                              rows="5" placeholder="Your message..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-lg btn-block">
+                    <i class="fas fa-paper-plane"></i> Send Message
+                </button>
+            </form>
+        </div>
+        
+        <!-- Contact Info -->
+        <div class="contact-info-section">
+            <div class="info-card">
+                <h3>Project Information</h3>
+                <p>
+                    CyberShield Security Suite is an educational cybersecurity toolkit 
+                    designed for learning and demonstration purposes.
+                </p>
+                
+                <div class="info-items">
+                    <div class="info-item">
+                        <i class="fas fa-code"></i>
+                        <div>
+                            <h4>Technology</h4>
+                            <p>Python, Flask, HTML/CSS/JS</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-graduation-cap"></i>
+                        <div>
+                            <h4>Purpose</h4>
+                            <p>Educational & Portfolio</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fab fa-github"></i>
+                        <div>
+                            <h4>Open Source</h4>
+                            <p>Available on GitHub</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="social-links">
+                <h4>Connect</h4>
+                <div class="social-icons">
+                    <a href="#" class="social-icon" title="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" class="social-icon" title="LinkedIn">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="#" class="social-icon" title="Twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('contactForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        message: document.getElementById('message').value.trim()
+    };
+    
+    // Basic validation
+    if (!formData.name || !formData.email || !formData.message) {
+        showToast('Please fill in all fields', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast(result.message, 'success');
+            e.target.reset();
+        } else {
+            showToast(result.error || 'Failed to send message', 'error');
+        }
+    } catch (error) {
+        showToast('Network error. Please try again.', 'error');
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block title %}About Cybersecurity - {{ app_name }}{% endblock %}
+
+{% block page_title %}About Cybersecurity{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <!-- Introduction -->
+    <section class="about-intro">
+        <div class="intro-content">
+            <h2>Understanding Cybersecurity</h2>
+            <p>
+                Cybersecurity is the practice of protecting systems, networks, and programs from 
+                digital attacks. These attacks are usually aimed at accessing, changing, or 
+                destroying sensitive information, extorting money, or interrupting normal 
+                business processes.
+            </p>
+        </div>
+        <div class="intro-visual">
+            <div class="security-shield-large">
+                <i class="fas fa-shield-halved"></i>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Topics Grid -->
+    <section class="topics-section">
+        <h2>Core Security Concepts</h2>
+        <div class="topics-grid">
+            <!-- Hashing -->
+            <div class="topic-card">
+                <div class="topic-icon">
+                    <i class="fas fa-fingerprint"></i>
+                </div>
+                <h3>Cryptographic Hashing</h3>
+                <p>
+                    A hash function is a one-way mathematical algorithm that converts input 
+                    data into a fixed-size string of characters. The same input always produces 
+                    the same hash, but any change to the input produces a completely different hash.
+                </p>
+                <div class="topic-details">
+                    <h4>Key Properties:</h4>
+                    <ul>
+                        <li><strong>Deterministic:</strong> Same input = same output</li>
+                        <li><strong>One-way:</strong> Cannot reverse to find original</li>
+                        <li><strong>Collision-resistant:</strong> Hard to find two inputs with same hash</li>
+                        <li><strong>Avalanche effect:</strong> Small change = completely different hash</li>
+                    </ul>
+                    <h4>Common Algorithms:</h4>
+                    <ul>
+                        <li><strong>SHA-256:</strong> Industry standard, 256-bit output</li>
+                        <li><strong>SHA-3:</strong> Latest SHA family member</li>
+                        <li><strong>MD5:</strong> Deprecated, still seen in legacy systems</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- File Integrity -->
+            <div class="topic-card">
+                <div class="topic-icon">
+                    <i class="fas fa-file-shield"></i>
+                </div>
+                <h3>File Integrity Monitoring</h3>
+                <p>
+                    File Integrity Monitoring (FIM) is a security practice that validates 
+                    the integrity of operating system and application files by comparing 
+                    their current state against a known, trusted baseline.
+                </p>
+                <div class="topic-details">
+                    <h4>Use Cases:</h4>
+                    <ul>
+                        <li>Detecting malware infections</li>
+                        <li>Identifying unauthorized changes</li>
+                        <li>Compliance requirements (PCI DSS, HIPAA)</li>
+                        <li>Digital forensics investigations</li>
+                    </ul>
+                    <h4>Real-World Tools:</h4>
+                    <ul>
+                        <li>OSSEC (Open Source)</li>
+                        <li>Tripwire</li>
+                        <li>AIDE (Advanced Intrusion Detection)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Phishing -->
+            <div class="topic-card">
+                <div class="topic-icon">
+                    <i class="fas fa-fish"></i>
+                </div>
+                <h3>Phishing Attacks</h3>
+                <p>
+                    Phishing is a type of social engineering attack where attackers disguise 
+                    themselves as trustworthy entities to trick victims into revealing sensitive 
+                    information or installing malware.
+                </p>
+                <div class="topic-details">
+                    <h4>Types of Phishing:</h4>
+                    <ul>
+                        <li><strong>Spear Phishing:</strong> Targeted attacks on specific individuals</li>
+                        <li><strong>Whaling:</strong> Targeting high-profile executives</li>
+                        <li><strong>Smishing:</strong> Phishing via SMS</li>
+                        <li><strong>Vishing:</strong> Voice phishing via phone calls</li>
+                    </ul>
+                    <h4>Red Flags:</h4>
+                    <ul>
+                        <li>Urgent or threatening language</li>
+                        <li>Requests for sensitive information</li>
+                        <li>Suspicious sender addresses</li>
+                        <li>Mismatched or suspicious URLs</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Password Security -->
+            <div class="topic-card">
+                <div class="topic-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <h3>Password Security</h3>
+                <p>
+                    Passwords are the first line of defense for most accounts. Strong password 
+                    practices are essential to prevent unauthorized access through brute force 
+                    or dictionary attacks.
+                </p>
+                <div class="topic-details">
+                    <h4>Attack Methods:</h4>
+                    <ul>
+                        <li><strong>Brute Force:</strong> Trying all combinations</li>
+                        <li><strong>Dictionary Attack:</strong> Using common words/passwords</li>
+                        <li><strong>Rainbow Tables:</strong> Pre-computed hash lookups</li>
+                        <li><strong>Credential Stuffing:</strong> Using leaked credentials</li>
+                    </ul>
+                    <h4>Best Practices:</h4>
+                    <ul>
+                        <li>Use 12+ characters minimum</li>
+                        <li>Mix character types</li>
+                        <li>Use unique passwords per account</li>
+                        <li>Enable two-factor authentication</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Digital Forensics -->
+            <div class="topic-card">
+                <div class="topic-icon">
+                    <i class="fas fa-magnifying-glass"></i>
+                </div>
+                <h3>Digital Forensics</h3>
+                <p>
+                    Digital forensics involves the recovery, investigation, and analysis of 
+                    material found in digital devices, often in relation to computer crime 
+                    or cybersecurity incidents.
+                </p>
+                <div class="topic-details">
+                    <h4>Process Steps:</h4>
+                    <ul>
+                        <li><strong>Identification:</strong> Recognize potential evidence</li>
+                        <li><strong>Preservation:</strong> Secure and document evidence</li>
+                        <li><strong>Analysis:</strong> Examine data systematically</li>
+                        <li><strong>Documentation:</strong> Record findings thoroughly</li>
+                        <li><strong>Presentation:</strong> Report in understandable terms</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- SOC Operations -->
+            <div class="topic-card">
+                <div class="topic-icon">
+                    <i class="fas fa-display"></i>
+                </div>
+                <h3>SOC Operations</h3>
+                <p>
+                    A Security Operations Center (SOC) is a centralized unit that deals with 
+                    security issues on an organizational and technical level. SOC analysts 
+                    monitor, detect, and respond to cybersecurity threats.
+                </p>
+                <div class="topic-details">
+                    <h4>SOC Analyst Tiers:</h4>
+                    <ul>
+                        <li><strong>Tier 1:</strong> Alert triage and initial investigation</li>
+                        <li><strong>Tier 2:</strong> Deep investigation and response</li>
+                        <li><strong>Tier 3:</strong> Threat hunting and advanced analysis</li>
+                    </ul>
+                    <h4>Key Tools:</h4>
+                    <ul>
+                        <li>SIEM (Security Information Event Management)</li>
+                        <li>EDR (Endpoint Detection and Response)</li>
+                        <li>Threat Intelligence Platforms</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Career Path -->
+    <section class="career-section">
+        <h2>Cybersecurity Career Paths</h2>
+        <div class="career-timeline">
+            <div class="career-item">
+                <div class="career-marker">1</div>
+                <div class="career-content">
+                    <h4>Security Analyst</h4>
+                    <p>Monitor systems, analyze threats, respond to incidents</p>
+                </div>
+            </div>
+            <div class="career-item">
+                <div class="career-marker">2</div>
+                <div class="career-content">
+                    <h4>Penetration Tester</h4>
+                    <p>Ethically hack systems to find vulnerabilities</p>
+                </div>
+            </div>
+            <div class="career-item">
+                <div class="career-marker">3</div>
+                <div class="career-content">
+                    <h4>Security Engineer</h4>
+                    <p>Design and implement security solutions</p>
+                </div>
+            </div>
+            <div class="career-item">
+                <div class="career-marker">4</div>
+                <div class="career-content">
+                    <h4>Security Architect</h4>
+                    <p>Design organization-wide security infrastructure</p>
+                </div>
+            </div>
+            <div class="career-item">
+                <div class="career-marker">5</div>
+                <div class="career-content">
+                    <h4>CISO</h4>
+                    <p>Lead security strategy at executive level</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

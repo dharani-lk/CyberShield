@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - {{ app_name }}{% endblock %}
+
+{% block page_title %}Security Dashboard{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <i class="fas fa-shield-halved"></i>
+            <span>Enterprise Security</span>
+        </div>
+        <h1 class="hero-title">
+            <span class="gradient-text">CyberShield</span>
+            <span>Security Suite</span>
+        </h1>
+        <p class="hero-subtitle">Protect. Analyze. Secure.</p>
+        <p class="hero-description">
+            A comprehensive cybersecurity toolkit for analyzing file integrity, 
+            detecting phishing attempts, and evaluating password strength. 
+            Built with modern security practices.
+        </p>
+        <div class="hero-actions">
+            <a href="{{ url_for('file_integrity') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-rocket"></i>
+                Get Started
+            </a>
+            <a href="{{ url_for('about') }}" class="btn btn-outline btn-lg">
+                <i class="fas fa-info-circle"></i>
+                Learn More
+            </a>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="shield-animation">
+            <div class="shield-outer"></div>
+            <div class="shield-middle"></div>
+            <div class="shield-inner">
+                <i class="fas fa-lock"></i>
+            </div>
+            <div class="shield-particles">
+                <span></span><span></span><span></span>
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Cards -->
+<section class="stats-section">
+    <div class="section-header">
+        <h2>Security Overview</h2>
+        <p>Real-time security metrics and analysis statistics</p>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-card" data-stat="files">
+            <div class="stat-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-value" id="filesScanned">{{ stats.files_scanned }}</h3>
+                <p class="stat-label">Files Scanned</p>
+            </div>
+            <div class="stat-trend positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>Active</span>
+            </div>
+        </div>
+        
+        <div class="stat-card" data-stat="threats">
+            <div class="stat-icon warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-value" id="threatsDetected">{{ stats.threats_detected }}</h3>
+                <p class="stat-label">Threats Detected</p>
+            </div>
+            <div class="stat-trend {% if stats.threats_detected == 0 %}positive{% else %}negative{% endif %}">
+                <i class="fas fa-shield-check"></i>
+                <span>{% if stats.threats_detected == 0 %}Clear{% else %}Alert{% endif %}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card" data-stat="passwords">
+            <div class="stat-icon">
+                <i class="fas fa-key"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-value" id="passwordsAnalyzed">{{ stats.passwords_analyzed }}</h3>
+                <p class="stat-label">Passwords Analyzed</p>
+            </div>
+            <div class="stat-trend positive">
+                <i class="fas fa-check-circle"></i>
+                <span>Secure</span>
+            </div>
+        </div>
+        
+        <div class="stat-card" data-stat="score">
+            <div class="stat-icon success">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-value" id="securityScore">{{ stats.security_score }}%</h3>
+                <p class="stat-label">Security Score</p>
+            </div>
+            <div class="stat-progress">
+                <div class="progress-bar" style="width: {{ stats.security_score }}%"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="section-header">
+        <h2>Security Tools</h2>
+        <p>Comprehensive toolkit for modern cybersecurity needs</p>
+    </div>
+    <div class="features-grid">
+        <!-- File Integrity Card -->
+        <a href="{{ url_for('file_integrity') }}" class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-file-shield"></i>
+            </div>
+            <h3 class="feature-title">File Integrity Checker</h3>
+            <p class="feature-description">
+                Verify file authenticity using SHA-256 cryptographic hashing. 
+                Detect unauthorized modifications and ensure data integrity.
+            </p>
+            <ul class="feature-list">
+                <li><i class="fas fa-check"></i> SHA-256 Hash Generation</li>
+                <li><i class="fas fa-check"></i> Integrity Verification</li>
+                <li><i class="fas fa-check"></i> Downloadable Reports</li>
+            </ul>
+            <span class="feature-link">
+                Open Tool <i class="fas fa-arrow-right"></i>
+            </span>
+        </a>
+        
+        <!-- Phishing Detector Card -->
+        <a href="{{ url_for('phishing') }}" class="feature-card">
+            <div class="feature-icon warning">
+                <i class="fas fa-fish"></i>
+            </div>
+            <h3 class="feature-title">Phishing Detector</h3>
+            <p class="feature-description">
+                Analyze URLs and email content for phishing indicators. 
+                Identify social engineering attacks before they succeed.
+            </p>
+            <ul class="feature-list">
+                <li><i class="fas fa-check"></i> URL Risk Analysis</li>
+                <li><i class="fas fa-check"></i> Email Content Scanning</li>
+                <li><i class="fas fa-check"></i> Brand Impersonation Detection</li>
+            </ul>
+            <span class="feature-link">
+                Open Tool <i class="fas fa-arrow-right"></i>
+            </span>
+        </a>
+        
+        <!-- Password Analyzer Card -->
+        <a href="{{ url_for('password') }}" class="feature-card">
+            <div class="feature-icon success">
+                <i class="fas fa-key"></i>
+            </div>
+            <h3 class="feature-title">Password Analyzer</h3>
+            <p class="feature-description">
+                Evaluate password strength with entropy calculation and 
+                pattern detection. Generate cryptographically secure passwords.
+            </p>
+            <ul class="feature-list">
+                <li><i class="fas fa-check"></i> Entropy Calculation</li>
+                <li><i class="fas fa-check"></i> Pattern Detection</li>
+                <li><i class="fas fa-check"></i> Secure Password Generation</li>
+            </ul>
+            <span class="feature-link">
+                Open Tool <i class="fas fa-arrow-right"></i>
+            </span>
+        </a>
+    </div>
+</section>
+
+<!-- Security Tips Section -->
+<section class="tips-section">
+    <div class="section-header">
+        <h2>Security Best Practices</h2>
+        <p>Essential cybersecurity habits to protect yourself online</p>
+    </div>
+    <div class="tips-grid">
+        <div class="tip-card">
+            <div class="tip-number">01</div>
+            <h4>Use Unique Passwords</h4>
+            <p>Never reuse passwords across different accounts. Use a password manager to handle complexity.</p>
+        </div>
+        <div class="tip-card">
+            <div class="tip-number">02</div>
+            <h4>Verify Before Clicking</h4>
+            <p>Always check URLs before clicking. Hover over links to see their true destination.</p>
+        </div>
+        <div class="tip-card">
+            <div class="tip-number">03</div>
+            <h4>Enable 2FA</h4>
+            <p>Two-factor authentication adds a crucial second layer of security to your accounts.</p>
+        </div>
+        <div class="tip-card">
+            <div class="tip-number">04</div>
+            <h4>Keep Software Updated</h4>
+            <p>Security patches fix vulnerabilities. Enable automatic updates whenever possible.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Update statistics periodically
+    async function updateStats() {
+        try {
+            const response = await fetch('/api/stats');
+            const data = await response.json();
+            
+            document.getElementById('filesScanned').textContent = data.files_scanned;
+            document.getElementById('threatsDetected').textContent = data.threats_detected;
+            document.getElementById('passwordsAnalyzed').textContent = data.passwords_analyzed;
+            document.getElementById('securityScore').textContent = data.security_score + '%';
+            
+            // Update progress bar
+            document.querySelector('.stat-progress .progress-bar').style.width = data.security_score + '%';
+        } catch (error) {
+            console.error('Failed to update stats:', error);
+        }
+    }
+    
+    // Update stats every 30 seconds
+    setInterval(updateStats, 30000);
+</script>
+{% endblock %}
